@@ -39,35 +39,34 @@ Embedding → [HomeostaticLayer × N] → Output
 - **Amnesia gate** – activates when τ > critical threshold (default 2.0)
 - **Output modulation** – `x * exp(-τ / 10)` (soft exponential decay)
 
----
-
-## 📊 Experiment
+📊 Experiment
+Разверните таблицу, чтобы сравнить базовую модель и вашу новую архитектуру.
 
 | Model | Diversity ↑ | Repeat ↓ | Verbs ↑ |
-|-------|-------------|----------|---------|
-| Standard Transformer | 0.750 | 0.023 | 9 |
+| :--- | :---: | :---: | :---: |
+| **Standard Transformer** | 0.750 | 0.023 | 9 |
 | **Homeostatic-Transformer** | **0.762** | 0.024 | **11** |
 
-**Example generation:**
-- **Standard:** *"Once upon a time, there was a little girl named Lily. ... her mom gave her a loud noise on the comet."*
-- **Homeostatic:** *"Once upon a time, there was a little fish named Tom. Kitty loved to play with his friends. ... They played together in the seek."*
+#### Example generation:
 
-Homeostatic text shows more active characters and narrative structure.
+* **Standard:** *"Once upon a time, there was a little girl named Lily. ... her mom gave her a loud noise on the comet."*
+* **Homeostatic:** *"Once upon a time, there was a little fish named Tom. Kitty loved to play with his friends. ... They played together in the seek."*
+
+> 💡 **Result:** Homeostatic text shows more active characters, richer vocabulary, and better narrative structure.
+
+---
+
+💓 Heartbeat & Amnesia Visualization
+При генерации текста модель динамически меняет свои внутренние параметры. Ниже показан график "пульса" (изменения температуры) и накопления амнезии (забывания контекста) при послойном анализе.
+
+![Model Heartbeat and Amnesia Accumulation](heartbeat.png)
+
+* **Heartbeat (Верхний график):** Показывает информационную нагрузку. Небольшой пик в самом начале (на слове *upon*) быстро стабилизируется и идёт далеко от критической линии `Critical (2.0)`. Это подтверждает стабильность работы слоя.
+* **Amnesia Accumulation (Нижний график):** Показывает, как модель плавно отсекает старый контекст по мере удлинения предложения, чтобы сфокусироваться на более важных и свежих токенах.
 
 ---
 
-## 💓 Heartbeat Visualization
 
-The temperature of a layer can be plotted word‑by‑word, revealing the model's "pulse":
-Word:     Once  upon  a  time  ,  a  little  girl  named  Lily  went  to  the  forest  .
-Temp:     0.50  0.45 0.48 0.62 0.58 0.55 0.72  0.95  1.20  1.15  0.88 0.65 0.52  0.48
-
-Peaks correspond to surprising or high‑information words.  
-If the temperature exceeds the critical threshold, **amnesia accumulates**, protecting the model from overload.
-
-*(See the notebook for the actual heartbeat plot.)*
-
----
 
 ## 🚀 Quick Start
 
