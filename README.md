@@ -66,6 +66,7 @@ Embedding → [HomeostaticLayer × N] → Output
 
 ---
 
+<img width="1389" height="890" alt="17832845329581719079556692941203" src="https://github.com/user-attachments/assets/71b1387a-e32d-4423-9e88-76cf517b02d1" />
 
 
 ## 🚀 Quick Start
