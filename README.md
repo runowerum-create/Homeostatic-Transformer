@@ -1,4 +1,4 @@
-# Homeostatic-Transformer
+щ# Homeostatic-Transformer
 "An experiment with homeostatic regulation in transformers."
 # Homeostatic-Transformer  
 *An experiment with homeostatic regulation in transformers.*
@@ -53,8 +53,7 @@ Embedding → [HomeostaticLayer × N] → Output
 * **Homeostatic:** *"Once upon a time, there was a little fish named Tom. Kitty loved to play with his friends. ... They played together in the seek."*
 
 > 💡 **Result:** Homeostatic text shows more active characters, richer vocabulary, and better narrative structure.
-
----
+--
 
 💓 Heartbeat & Amnesia Visualization
 При генерации текста модель динамически меняет свои внутренние параметры. Ниже показан график "пульса" (изменения температуры) и накопления амнезии (забывания контекста) при послойном анализе.
@@ -109,8 +108,8 @@ Novelty
 · Apply to continual learning & long‑form dialog
 
 ---
-@misc{homeostatictransformer2025,
-  author = {Your Name},
+@misc{homeostatictransformer2026,
+  author = {runorunowerum-create},
   title = {Homeostatic-Transformer: An experiment with homeostatic regulation in transformers},
-  year = {2025},
+  year = {2026}
   note = {GitHub repository}
