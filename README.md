@@ -73,7 +73,8 @@ Homeostatic: "Once upon a time, there was a little fish named Tom. Kitty loved t
 
 Heartbeat (Верхний график): Показывает информационную нагрузку. Небольшой пик в самом начале (на слове upon) быстро стабилизируется и идёт далеко от критической линии Critical (2.0). Это подтверждает стабильность работы слоя.
 Amnesia Accumulation (Нижний график): Показывает, как модель плавно отсекает старый контекст по мере удлинения предложения, чтобы сфокусироваться на более важных и свежих токенах.
-<img width="1389" height="890" alt="Без названия (1)" src="https://github.com/user-attachments/assets/5c954b6f-d352-4e37-ad14-82a1c0e5fbed" />
+<img width="1389" height="890" alt="Без названия (1)" src="https://github.com/user-attachments/assets/5c954b6f-d352-4e37-ad14-82a1c0e5fbed" /><img width="1389" height="890" alt="Без названия (1)" src="https://github.com/user-attachments/assets/cddc3a83-eab8-414b-ac18-67f643cc8022" />
+
 🚀 Quick Start
 Run everything in your browser – no local GPU needed.
 
