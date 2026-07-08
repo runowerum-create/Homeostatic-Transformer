@@ -106,11 +106,12 @@ Novelty
 · Apply to continual learning & long‑form dialog
 ---
 @misc{homeostatictransformer2026,
-  author = {runorunowerum-create},
+
+author = {runorunowerum-create},
   title = {Homeostatic-Transformer: An experiment with homeostatic regulation in transformers},
-  year = {2026}
+  year = {2026},
   note = {GitHub repository}
----{{{
+---
 
 
 ## 🧪 Эксперимент: Гомеостатический контур (2026-07-08)
