@@ -89,29 +89,33 @@ model = HomeostaticTransformer(
 ├── train_and_evaluate.ipynb     # Full experiment notebook
 ├── heartbeat.png                # Example pulse plot
 └── README.md
-Novelty
+## 🧠 Novelty
 
-
-· Learned homeostasis – temperature and amnesia are not hyperparameters but dynamic, trainable states.
-· Exponential modulation – smooth signal decay without hard thresholds.
-· Continuous state – temperature persists across tokens, forming a "load history".
-· Interpretable – single scalar per layer shows model's internal stress.
+- **Learned homeostasis** – temperature and amnesia are not hyperparameters but dynamic, trainable states.
+- **Exponential modulation** – smooth signal decay without hard thresholds.
+- **Continuous state** – temperature persists across tokens, forming a "load history".
+- **Interpretable** – single scalar per layer shows model's internal stress.
 
 ---
 
-📈 Future Work
+## 📈 Future Work
 
-· Scale to full TinyStories (2M+ stories)
-· Integrate “sleep” phases into training (periodic resets)
-· Apply to continual learning & long‑form dialog
+- Scale to full TinyStories (2M+ stories)
+- Integrate “sleep” phases into training (periodic resets)
+- Apply to continual learning & long‑form dialog
+
 ---
+
+## 📚 Citation
+
+```bibtex
 @misc{homeostatictransformer2026,
-
-author = {runorunowerum-create},
+  author = {runorunowerum-create},
   title = {Homeostatic-Transformer: An experiment with homeostatic regulation in transformers},
   year = {2026},
   note = {GitHub repository}
----
+}
+
 
 
 ## 🧪 Эксперимент: Гомеостатический контур (2026-07-08)
@@ -169,3 +173,13 @@ author = {runorunowerum-create},
 **Вывод:** модель не снижает глаголы плавно — она **переключает когнитивную модальность**. Вместо описания зала уходит в математику, тесты, рекламу. Это более глубокая форма гомеостаза: не подавление динамики, а **смена жанра как защитный механизм**.
 
 **Код:** `experiments/homeostatic_loop/run_final.py`
+
+---
+
+В этом блоке всё исправлено:
+- ✅ Заголовки `Novelty` и `Future Work` на своих местах
+- ✅ BibTeX правильно закрыт и внутри кодового блока
+- ✅ Таблица подходов перед экспериментом
+- ✅ Нет дублирования раздела с экспериментом
+- ✅ Нет битых `---{{{`
+
