@@ -1,4 +1,4 @@
-# Homeostatic-Transformer  
+ # Homeostatic-Transformer
 *An experiment with homeostatic regulation in transformers.*
 
 [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/)
@@ -31,6 +31,8 @@ Embedding → [HomeostaticLayer × N] → Output
 └─ HomeostaticModule
 ├─ Temperature (τ)
 └─ Amnesia (α)
+
+
 **HomeostaticModule** (per layer):
 - **Information density** – cosine similarity between query (last token) and keys (mean context)
 - **Temperature update** – learned gate + drift → clamped to [0.1, 5.0]
@@ -50,36 +52,34 @@ Embedding → [HomeostaticLayer × N] → Output
 }
 🔬 Сравнение подходов к гомеостазу в трансформерах
 Подход	Уровень применения	Механизм	Пример использования
-Обученный гомеостаз	Архитектура модели	Температура и амнезия — обучаемые параметры слоёв; интегрированы в forward‑проход	Homeostatic-Transformer
-Инференс-гомеостаз	Этап генерации (inference)	Внешнее управление: амнезия контекста и повышенная температура, применяемые к готовой LLM	Эксперимент с Qwen2.5‑1.5B
+Обученный гомеостаз	Архитектура модели	Температура и амнезия — обучаемые параметры слоёв; интегрированы в forward‑проход	Homeostatic-Transformer
+Инференс-гомеостаз	Этап генерации (inference)	Внешнее управление: амнезия контекста и повышенная температура, применяемые к готовой LLM
 Ключевое различие
-Обученный: гомеостаз встроен в модель — она сама учится балансировать возбуждение и забывание в процессе обучения.
-Инференс: воздействие на «чёрный ящик» извне — как если бы нейробиолог вводил препарат, чтобы вызвать нужный режим работы.
+Обученный: гомеостаз встроен в модель — она сама учится балансировать возбуждение и забывание в процессе обучения.
+Инференс: воздействие на «чёрный ящик» извне — как если бы нейробиолог вводил препарат, чтобы вызвать нужный режим работы.
 Общая цель обоих подходов: подавление избыточной динамики активаций и стабилизация внутреннего состояния модели для более предсказуемого и разнообразного вывода.
-
 В рамках данного репозитория реализован обученный гомеостаз: температура и амнезия являются внутренними, обучаемыми состояниями модели. Ниже приведены результаты экспериментов, демонстрирующие влияние этих механизмов на качество генерации.
-
 📊 Experiment
 Model	Diversity ↑	Repeat ↓	Verbs ↑
 Standard Transformer	0.750	0.023	9
-Homeostatic-Transformer	0.762	0.024	11
+Homeostatic-Transformer	0.762	0.024
 Example generation:
 Standard: "Once upon a time, there was a little girl named Lily. ... her mom gave her a loud noise on the comet."
 Homeostatic: "Once upon a time, there was a little fish named Tom. Kitty loved to play with his friends. ... They played together in the seek."
 💡 Result: Homeostatic text shows more active characters, richer vocabulary, and better narrative structure.
-
 💓 Heartbeat & Amnesia Visualization
-При генерации текста модель динамически меняет свои внутренние параметры. Ниже показан график "пульса" (изменения температуры) и накопления амнезии (забывания контекста) при послойном анализе.
+При генерации текста модель динамически меняет свои внутренние параметры. Ниже показан график «пульса» (изменения температуры) и накопления амнезии (забывания контекста) при послойном анализе.
 
 Heartbeat (Верхний график): Показывает информационную нагрузку. Небольшой пик в самом начале (на слове upon) быстро стабилизируется и идёт далеко от критической линии Critical (2.0). Это подтверждает стабильность работы слоя.
-Amnesia Accumulation (Нижний график): Показывает, как модель плавно отсекает старый контекст по мере удлинения предложения, чтобы сфокусироваться на более важных и свежих токенах.
-<img width="1389" height="890" alt="Без названия (1)" src="https://github.com/user-attachments/assets/5c954b6f-d352-4e37-ad14-82a1c0e5fbed" /><img width="1389" height="890" alt="Без названия (1)" src="https://github.com/user-attachments/assets/cddc3a83-eab8-414b-ac18-67f643cc8022" />
+Amnesia Accumulation (Нижний график)
+Показывает, как модель плавно отсекает старый контекст по мере удлинения предложения, чтобы сфокусироваться на более важных и свежих токенах.
 
 🚀 Quick Start
 Run everything in your browser – no local GPU needed.
 
 
 Requirements: torch, datasets, tokenizers, matplotlib
+
 from homeostatic_transformer import HomeostaticTransformer
 
 model = HomeostaticTransformer(
@@ -90,6 +90,7 @@ model = HomeostaticTransformer(
 )
 
 # Train & visualize – see the notebook
+
 ├── homeostatic_transformer.py   # Model implementation
 ├── train_and_evaluate.ipynb     # Full experiment notebook
 ├── heartbeat.png                # Example pulse plot
@@ -102,22 +103,23 @@ model = HomeostaticTransformer(
 
 Контроль: полный промпт, t=0.7
 Гомеостаз: затравка "The dark hall was completely empty. Dust", t=1.9 и t=2.5
-Метрика: % глаголов  через spaCy
-Результаты:
-
-Режим	t	% глаголов	Поведение
+Метрика: % глаголов через spaCy
+Результаты:Режим	t	% глаголов	Поведение
 Контроль	0.7	17.8%	Связный нарратив
 Гомеостаз	1.9	20.3%	Задача по вероятности
 Гомеостаз	2.5	16.7%	Рекламный шаблон
+
 Вывод: модель не снижает глаголы плавно — она переключает когнитивную модальность. Вместо описания зала уходит в математику, тесты, рекламу. Это более глубокая форма гомеостаза: не подавление динамики, а смена жанра как защитный механизм.
 
 Код: experiments/homeostatic_loop/run_final.py
+
 🧠 Novelty
 Learned homeostasis – temperature and amnesia are not hyperparameters but dynamic, trainable states.
 Exponential modulation – smooth signal decay without hard thresholds.
 Continuous state – temperature persists across tokens, forming a "load history".
 Interpretable – single scalar per layer shows model's internal stress.
+
 📈 Future Work
 Scale to full TinyStories (2M+ stories)
 Integrate “sleep” phases into training (periodic resets)
-Apply to continual learning & long‑form dialog
+Apply to continual learning 
