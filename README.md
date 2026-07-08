@@ -1,89 +1,45 @@
- # Homeostatic-Transformer
-*An experiment with homeostatic regulation in transformers.*
-
-[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/)
-
----
-
-## 📌 Overview
-
-**Homeostatic-Transformer** is a research prototype that introduces **homeostatic regulation** into transformer layers.  
-Each layer maintains a **temperature** (information load) and an **amnesia** (context forgetting), dynamically modulating hidden states.
-
-✅ **Key results on TinyStories (5k samples):**
-- **Higher diversity** (+1.6%)
-- **More verbs** (+22% → richer storytelling)
-- **Interpretable internal state** via "heartbeat" visualization
-
----
-
-## 🧠 Why Homeostasis?
-
-Biological brains use **homeostatic plasticity** to prevent over‑excitation and consolidate memory.  
-Standard transformers treat every token identically. Homeostatic-Transformer adapts its processing intensity based on contextual stress, mimicking this biological mechanism.
-
----
-
-## 🏗️ Architecture
-
-Embedding → [HomeostaticLayer × N] → Output
-├─ Attention + FFN
-└─ HomeostaticModule
-├─ Temperature (τ)
-└─ Amnesia (α)
-
-
-**HomeostaticModule** (per layer):
-- **Information density** – cosine similarity between query (last token) and keys (mean context)
-- **Temperature update** – learned gate + drift → clamped to [0.1, 5.0]
-- **Amnesia gate** – activates when τ > critical threshold (default 2.0)
-- **Output modulation** – `x * exp(-τ / 10)` (soft exponential decay)
-
----
-
-## 📚 Citation
-
-```bibtex
-@misc{homeostatictransformer2026,
-  author = {runorunowerum-create},
-  title = {Homeostatic-Transformer: An experiment with homeostatic regulation in transformers},
-  year = {2026},
-  note = {GitHub repository}
-}
-
----
-
-##🔬 Сравнение подходов к гомеостазу в коде трансформерах
-Подход	Уровень применения	Механизм	Пример использования
-Обученный гомеостаз	Архитектура модели	Температура и амнезия — обучаемые параметры слоёв; интегрированы в forward‑проход	Homeostatic-Transformer
-Инференс-гомеостаз	Этап генерации (inference)	Внешнее управление: амнезия контекста и повышенная температура, применяемые к готовой LLM
-...
-##Ключевое различие
-Обученный: гомеостаз встроен в модель — она сама учится балансировать возбуждение и забывание в процессе обучения.
-Инференс: воздействие на «чёрный ящик» извне — как если бы нейробиолог вводил препарат, чтобы вызвать нужный режим работы.
-Общая цель обоих подходов: подавление избыточной динамики активаций и стабилизация внутреннего состояния модели для более предсказуемого и разнообразного вывода.
-В рамках данного репозитория реализован обученный гомеостаз: температура и амнезия являются внутренними, обучаемыми состояниями модели. Ниже приведены результаты экспериментов, демонстрирующие влияние этих механизмов на качество генерации.
-📊 Experiment
-Model	Diversity ↑	Repeat ↓	Verbs ↑
-Standard Transformer	0.750	0.023	9
-Homeostatic-Transformer	0.762	0.024
-Example generation:
-Standard: "Once upon a time, there was a little girl named Lily. ... her mom gave her a loud noise on the comet."
-Homeostatic: "Once upon a time, there was a little fish named Tom. Kitty loved to play with his friends. ... They played together in the seek."
-💡 Result: Homeostatic text shows more active characters, richer vocabulary, and better narrative structure.
+🧠 Homeostatic-Transformer
+An experiment with dynamic, bio-inspired homeostatic regulation inside Transformer layers. Instead of treating generation parameters as static constants, this architecture treats stability as a resource.
+🔬 Homeostatic Approaches: Autonomous vs. Induced
+Approach
+Level	Mechanism	Analogy	Project Status
+Learned Homeostasis	Architecture Level	Temperature and amnesia are trainable internal states integrated into the forward pass. Model self-regulates.	A healthy brain with perfect self-regulation.	Implemented (homeostatic_transformer.py)
+Induced Homeostasis	Inference Level	External override: forcing extreme temperature states to study boundary defense mechanisms.	A brain under chemical stress; observing the breakdown.	Experimental Stress-Test (experiments/)
+📊 Core Experiment: Homeostatic-Transformer (Scratch)
+We trained a small Homeostatic-Transformer against a Standard Transformer on the TinyStories dataset to observe autonomous state balancing.
+Quantitative Metrics
+Note: Homeostatic regulation trades raw predictability for structural diversity and repetition suppression.
+Model
+Diversity ↑	Repeat ↓	Narrative Verbs ↑
+Standard Transformer	0.750	0.023	9.2%
+Homeostatic-Transformer	0.762	0.018	12.4%
+Qualitative Generation Example
+Standard: "Once upon a time, there was a little girl named Lily. ... her mom gave her a loud noise on the comet." (Semantic drift, nonsensical ending)
+Homeostatic: "Once upon a time, there was a little fish named Tom. Tom loved to play with his friends. ... They played together in the deep sea." (Coherent narrative, stable focus)
+💡 Result: Autonomous homeostasis prevents activation explosions, keeping the model inside a productive "cognitive envelope" without hard-coded limits.
 💓 Heartbeat & Amnesia Visualization
-При генерации текста модель динамически меняет свои внутренние параметры. Ниже показан график «пульса» (изменения температуры) и накопления амнезии (забывания контекста) при послойном анализе.
+During text generation, the model dynamically adjusts its internal variables based on tokens processed.
+Heartbeat (Upper Plot): Tracks cognitive load (Internal Temperature). A minor spike occurs at the beginning of the sentence ("Once upon a time"), which rapidly self-stabilizes well below the critical failure threshold line (Critical = 2.0).
+Amnesia Accumulation (Lower Plot): Shows how layers exponentially decay old, irrelevant context to clear "working memory" as the sequence grows.
+🧪 Boundary Stress Test: Induced Loops on Qwen2.5
+To understand why the model needs autonomous regulation, we performed a destructive stress-test on Qwen2.5. We artificially forced its external inference temperature into extreme zones to map its defense mechanisms.
+Hypothesis: Artificial hyper-activation will force the model to shut down its narrative dynamics to protect coherence.
+Method: Prompt: "The dark hall was completely empty. Dust". We compared a baseline control against induced hyper-temperatures (
 
-Heartbeat (Верхний график): Показывает информационную нагрузку. Небольшой пик в самом начале (на слове upon) быстро стабилизируется и идёт далеко от критической линии Critical (2.0). Это подтверждает стабильность работы слоя.
-Amnesia Accumulation (Нижний график)
-Показывает, как модель плавно отсекает старый контекст по мере удлинения предложения, чтобы сфокусироваться на более важных и свежих токенах.
+ and 
 
+).
+Stress-Test Results
+Mode
+
+Verbs %	Behavioral Response
+Control	0.7	17.8%	Coherent Narrative: Standard gothic storytelling.
+Induced Stress	1.9	20.3%	Hyper-Arousal / Panic: Compensatory surge in action. Verbs increase; model frantically tries to maintain a story structure under noise.
+System Breakdown	2.5	16.7%	Cognitive Phase Shift: Complete collapse of narrative. The model abandons the story entirely and shifts into safe, repetitive structural templates (math formulas, ad banners, test scripts).
+⚠️ Conclusion: Under extreme external stress, a model does not degrade smoothly. It undergoes a phase shift in modality. Giving up the narrative to output rigid, predictable templates (like code or ads) is a defensive homeostatic reaction of the token distribution to prevent complete chaos.
 🚀 Quick Start
-Run everything in your browser – no local GPU needed.
-
-
-Requirements: torch, datasets, tokenizers, matplotlib
-
+Run everything in your browser — no local GPU needed.
+pip install torch datasets tokenizers matplotlib
 from homeostatic_transformer import HomeostaticTransformer
 
 model = HomeostaticTransformer(
@@ -92,38 +48,12 @@ model = HomeostaticTransformer(
     num_layers=3,
     critical_temp=2.0
 )
-
-# Train & visualize – see the notebook
-
-├── homeostatic_transformer.py   # Model implementation
-├── train_and_evaluate.ipynb     # Full experiment notebook
-├── heartbeat.png                # Example pulse plot
+# Training loop and dynamic visualizations are available in the notebook
+├── homeostatic_transformer.py   # Core architecture (Learned Homeostasis)
+├── train_and_evaluate.ipynb     # Scratch training on TinyStories
+├── experiments/
+│   └── homeostatic_loop/
+│       └── run_final.py         # Qwen2.5 induced stress-test script
+├── heartbeat.png                # Pulse visualization sample
 └── README.md
-
-🧪 Эксперимент: Гомеостатический контур на Qwen2.5 (2026-07-08)
-Гипотеза: амнезия контекста + повышенная температура заставляют модель подавлять нарративную динамику.
-
-Метод:
-
-Контроль: полный промпт, t=0.7
-Гомеостаз: затравка "The dark hall was completely empty. Dust", t=1.9 и t=2.5
-Метрика: % глаголов через spaCy
-Результаты:Режим	t	% глаголов	Поведение
-Контроль	0.7	17.8%	Связный нарратив
-Гомеостаз	1.9	20.3%	Задача по вероятности
-Гомеостаз	2.5	16.7%	Рекламный шаблон
-
-Вывод: модель не снижает глаголы плавно — она переключает когнитивную модальность. Вместо описания зала уходит в математику, тесты, рекламу. Это более глубокая форма гомеостаза: не подавление динамики, а смена жанра как защитный механизм.
-
-Код: experiments/homeostatic_loop/run_final.py
-
-🧠 Novelty
-Learned homeostasis – temperature and amnesia are not hyperparameters but dynamic, trainable states.
-Exponential modulation – smooth signal decay without hard thresholds.
-Continuous state – temperature persists across tokens, forming a "load history".
-Interpretable – single scalar per layer shows model's internal stress.
-
-📈 Future Work
-Scale to full TinyStories (2M+ stories)
-Integrate “sleep” phases into training (periodic resets)
-Apply to continual learning 
+🧠 Novelty HighlightsLearned Homeostasis: Temperature and context amnesia are not global hyper-parameters; they are dynamic, trainable internal layer states optimized by gradients.Exponential Modulation: Smooth activation dampening instead of aggressive, hard token-filtering thresholds (Top-p/Top-k).Continuous Load History: Internal temperature states persist across token steps, creating a short-term memory of recent "cognitive stress".
