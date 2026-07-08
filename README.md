@@ -1,5 +1,3 @@
-щ# Homeostatic-Transformer
-"An experiment with homeostatic regulation in transformers."
 # Homeostatic-Transformer  
 *An experiment with homeostatic regulation in transformers.*
 
@@ -87,12 +85,12 @@ model = HomeostaticTransformer(
 )
 
 # Train & visualize – see the notebook
-.
 ├── homeostatic_transformer.py   # Model implementation
 ├── train_and_evaluate.ipynb     # Full experiment notebook
 ├── heartbeat.png                # Example pulse plot
 └── README.md
 Novelty
+
 
 · Learned homeostasis – temperature and amnesia are not hyperparameters but dynamic, trainable states.
 · Exponential modulation – smooth signal decay without hard thresholds.
@@ -106,14 +104,14 @@ Novelty
 · Scale to full TinyStories (2M+ stories)
 · Integrate “sleep” phases into training (periodic resets)
 · Apply to continual learning & long‑form dialog
-
 ---
 @misc{homeostatictransformer2026,
   author = {runorunowerum-create},
   title = {Homeostatic-Transformer: An experiment with homeostatic regulation in transformers},
   year = {2026}
   note = {GitHub repository}
----
+---{{{
+
 
 ## 🧪 Эксперимент: Гомеостатический контур (2026-07-08)
 
