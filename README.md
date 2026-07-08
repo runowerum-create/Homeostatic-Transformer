@@ -75,7 +75,7 @@ Run everything in your browser – **no local GPU needed**.
 **Requirements:** `torch`, `datasets`, `tokenizers`, `matplotlib`
 
 ```python
-from homeostatic_transformer import HomeostaticTransformer
+from src.homeostatic_transformer import HomeostaticTransformer
 
 model = HomeostaticTransformer(
     vocab_size=5000,
@@ -85,6 +85,12 @@ model = HomeostaticTransformer(
 )
 
 # Train & visualize – see the notebook
+
+├── homeostatic_transformer.py   # Model implementation
+├── train_and_evaluate.ipynb     # Full experiment notebook
+├── heartbeat.png                # Example pulse plot
+└── README.md
+
 🧠 Novelty
 
 · Learned homeostasis – temperature and amnesia are not hyperparameters but dynamic, trainable states.
