@@ -1,144 +1,74 @@
-# Homeostatic-Transformer  
-*An experiment with homeostatic regulation in transformers.*
+# 🌡️ Eulerian Homeostatic Transformer
 
-[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/)
+*Эксперимент по замкнутому гомеостатическому регулированию и динамическим фазовым переходам в слоях трансформера.*
 
----
-
-## 📌 Overview
-
-**Homeostatic-Transformer** is a research prototype that introduces **homeostatic regulation** into transformer layers.  
-Each layer maintains a **temperature** (information load) and an **amnesia** (context forgetting), dynamically modulating hidden states.
-
-✅ **Key results on TinyStories (5k samples):**
-- **Higher diversity** (+1.6%)
-- **More verbs** (+22% → richer storytelling)
-- **Interpretable internal state** via "heartbeat" visualization
+## 📌 Обзор
+**Eulerian Homeostatic Transformer** рассматривает латентное пространство как **динамический поток (dynamical flow)**, регулируемый контуром обратной связи (симуляция биологического торможения и вязкости).
 
 ---
 
-## 🧠 Why Homeostasis?
+## 🧬 Ключевые механизмы (Core Architecture)
 
-Biological brains use **homeostatic plasticity** to prevent over‑excitation and consolidate memory.  
-Standard transformers treat every token identically. Homeostatic-Transformer adapts its processing intensity based on contextual stress, mimicking this biological mechanism.
+### 1. Эйлеров вихревой поток (Eulerian Vortex Memory)
+Контекст формирует виртуальный вихрь, где траектория зависит от информационного давления (\(info\_pressure\)), основанного на косинусном сходстве.
 
----
+### 2. Динамический гомеостатический контур
+Регулирует амплитуду сигнала (\(x\)) для поддержания целевой температуры (\(\tau_{target}\)):
+\(x_{modulated} = x \cdot \exp\left(\frac{\tau_{target} - \tau}{\lambda}\right)\)
 
-## 🏗️ Architecture
- Embedding → [HomeostaticLayer × N] → Output
-├─ Attention + FFN
-└─ HomeostaticModule
-├─ Temperature (τ)
-└─ Amnesia (α)
-
-**HomeostaticModule** (per layer):
-- **Information density** – cosine similarity between query (last token) and keys (mean context)
-- **Temperature update** – learned gate + drift → clamped to [0.1, 5.0]
-- **Amnesia gate** – activates when τ > critical threshold (default 2.0)
-- **Output modulation** – `x * exp(-τ / 10)` (soft exponential decay)
+- **Недогрузка (\(\tau < \tau_{target}\)):** Ампличфикация сигнала.
+- **Равновесие (\(\tau = \tau_{target}\)):** Стабильный поток.
+- **Перегрев (\(\tau > \tau_{target}\)):** Синаптическое торможение (защита от энтропийного взрыва).
 
 ---
 
-## 📊 Experiment
+## 📊 Результаты тестов (TinyStories)
 
-| Model | Diversity ↑ | Repeat ↓ | Verbs ↑ |
-| :--- | :---: | :---: | :---: |
-| **Standard Transformer** | 0.750 | 0.023 | 9 |
-| **Homeostatic-Transformer** | **0.762** | 0.024 | **11** |
+### 1. Сравнительный анализ генерации
 
-#### Example generation:
+| Модель | Diversity ↑ | Repeat ↓ | Verbs ↑ | LM Loss ↓ |
+| :--- | :---: | :---: | :---: | :---: |
+| **Standard** | 0.750 | 0.023 | 9 | 6.203 |
+| **Homeostatic** | **0.762** | 0.024 | **11** | **2.928** |
 
-* **Standard:** *"Once upon a time, there was a little girl named Lily. ... her mom gave her a loud noise on the comet."*
-* **Homeostatic:** *"Once upon a time, there was a little fish named Tom. Kitty loved to play with his friends. ... They played together in the seek."*
-
-> 💡 **Result:** Homeostatic text shows more active characters, richer vocabulary, and better narrative structure.
+### 2. Внутренняя динамика
+Верхний слой стабилизировался в диапазоне **0.26 - 0.32**, предотвращая тепловой коллапс.
 
 ---
 
-## 💓 Heartbeat & Amnesia Visualization
+## 💓 Графики: Heartbeat & Amnesia
 
-При генерации текста модель динамически меняет свои внутренние параметры. Ниже показан график "пульса" (изменения температуры) и накопления амнезии (забывания контекста) при послойном анализе.
+![Heartbeat and Amnesia](heartbeat.png)
 
-- **Heartbeat (Верхний график):** Показывает информационную нагрузку. Небольшой пик в самом начале (на слове *upon*) быстро стабилизируется и идёт далеко от критической линии `Critical (2.0)`. Это подтверждает стабильность работы слоя.
-- **Amnesia Accumulation (Нижний график):** Показывает, как модель плавно отсекает старый контекст по мере удлинения предложения, чтобы сфокусироваться на более важных и свежих токенах.
-
-![Heartbeat and Amnesia](https://github.com/user-attachments/assets/71b1387a-e32d-4423-9e88-76cf517b02d1)
+- **Heartbeat:** Информационная нагрузка; стабилизация вдали от критической линии (2.0).
+- **Amnesia Accumulation:** Динамическое отсечение старого контекста.
 
 ---
 
-## 🚀 Quick Start
+## 🧪 Эксперимент: Qwen2.5
 
-Run everything in your browser – **no local GPU needed**.
+Тест на экстремальные нагрузки (Затравка: *"The dark hall was completely empty. Dust"*).
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/)
+| Режим | Температура (\(t\)) | % Глаголов | Поведение потока |
+| :--- | :---: | :---: | :--- |
+| **Контроль** | 0.7 | 17.8% | Связный нарратив. |
+| **Пик** | 1.9 | **20.3%** | Максимальное возбуждение. |
+| **Торможение**| 2.5 | 16.7% | Переход в шаблон (охранительное торможение). |
 
-**Requirements:** `torch`, `datasets`, `tokenizers`, `matplotlib`
+---
 
+## 🛠️ Спецификация кода
+При `batch_size > 1` использовать только тензорные операции (без `.item()`) для сохранения графа градиентов:
 ```python
-from src.homeostatic_transformer import HomeostaticTransformer
+amnesia_gate = torch.sigmoid((tau - self.critical_temp) / 0.1)
+```
 
-model = HomeostaticTransformer(
-    vocab_size=5000,
-    embed_dim=128,
-    num_layers=3,
-    critical_temp=2.0
-)
-
-# Train & visualize – see the notebook
-
-├── homeostatic_transformer.py   # Model implementation
-├── train_and_evaluate.ipynb     # Full experiment notebook
-├── heartbeat.png                # Example pulse plot
-└── README.md
-
-🧠 Novelty
-
-· Learned homeostasis – temperature and amnesia are not hyperparameters but dynamic, trainable states.
-· Exponential modulation – smooth signal decay without hard thresholds.
-· Continuous state – temperature persists across tokens, forming a "load history".
-· Interpretable – single scalar per layer shows model's internal stress.
-
----
-
-📈 Future Work
-
-· Scale to full TinyStories (2M+ stories)
-· Integrate “sleep” phases into training (periodic resets)
-· Apply to continual learning & long‑form dialog
-
----
-📚 Citation
-@misc{homeostatictransformer2026,
-  author = {runorunowerum-create},
-  title = {Homeostatic-Transformer: An experiment with homeostatic regulation in transformers},
+## 📚 Цитата (Citation)
+```bibtex
+@misc{eulerianhomeostatic2026,
+  author = {runowerum-create},
+  title = {Eulerian Homeostatic Transformer: An experiment with closed-loop fluid dynamics in LLM},
   year = {2026},
   note = {GitHub repository}
 }
-🔬 Два подхода к гомеостазу в трансформерах
-Подход Уровень Механизм Где применяется
-Обученный гомеостаз Архитектура модели Температура и амнезия — trainable параметры слоёв Homeostatic-Transformer
-Инференс-гомеостаз Генерация (inference) Амнезия + высокая
-температура к готовой LLM извне Эксперимент с Qwen2.5-1.5B
-Ключевое различие:
-
-· Обученный — модель учится сама регулировать возбуждение, гомеостаз «встроен в мозг».
-· Инференс — мы вызываем гомеостатический ответ у чёрного ящика, как нейробиолог вводит препарат.
-🧪 Эксперимент: Гомеостатический контур на Qwen2.5 (2026-07-08)
-
-Гипотеза: амнезия контекста + повышенная температура заставляют модель подавлять нарративную динамику.
-
-Метод:
-
-· Контроль: полный промпт, t=0.7
-· Гомеостаз: затравка "The dark hall was completely empty. Dust", t=1.9 и t=2.5
-· Метрика: % глаголов через spaCy
-
-Результаты:
-Режим t % глаголов Поведение
-Контроль 0.7 17.8% Связный нарратив
-Гомеостаз 1.9 20.3% Задача по вероятности Гомеостаз 2.5 16.7% Рекламный шаблон
-Вывод: модель не снижает глаголы плавно — она переключает когнитивную модальность. Вместо описания зала уходит в математику, тесты, рекламу. Это более глубокая форма гомеостаза: не подавление динамики, а смена жанра как защитный механизм.
-
-Код: experiments/homeostatic_loop/run_final.py
-
 ```
