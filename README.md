@@ -1,74 +1,68 @@
-# 🌡️ Eulerian Homeostatic Transformer
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
-*Эксперимент по замкнутому гомеостатическому регулированию и динамическим фазовым переходам в слоях трансформера.*
-
-## 📌 Обзор
-**Eulerian Homeostatic Transformer** рассматривает латентное пространство как **динамический поток (dynamical flow)**, регулируемый контуром обратной связи (симуляция биологического торможения и вязкости).
-
----
-
-## 🧬 Ключевые механизмы (Core Architecture)
-
-### 1. Эйлеров вихревой поток (Eulerian Vortex Memory)
-Контекст формирует виртуальный вихрь, где траектория зависит от информационного давления (\(info\_pressure\)), основанного на косинусном сходстве.
-
-### 2. Динамический гомеостатический контур
-Регулирует амплитуду сигнала (\(x\)) для поддержания целевой температуры (\(\tau_{target}\)):
-\(x_{modulated} = x \cdot \exp\left(\frac{\tau_{target} - \tau}{\lambda}\right)\)
-
-- **Недогрузка (\(\tau < \tau_{target}\)):** Ампличфикация сигнала.
-- **Равновесие (\(\tau = \tau_{target}\)):** Стабильный поток.
-- **Перегрев (\(\tau > \tau_{target}\)):** Синаптическое торможение (защита от энтропийного взрыва).
-
----
-
-## 📊 Результаты тестов (TinyStories)
-
-### 1. Сравнительный анализ генерации
-
-| Модель | Diversity ↑ | Repeat ↓ | Verbs ↑ | LM Loss ↓ |
-| :--- | :---: | :---: | :---: | :---: |
-| **Standard** | 0.750 | 0.023 | 9 | 6.203 |
-| **Homeostatic** | **0.762** | 0.024 | **11** | **2.928** |
-
-### 2. Внутренняя динамика
-Верхний слой стабилизировался в диапазоне **0.26 - 0.32**, предотвращая тепловой коллапс.
-
----
-
-## 💓 Графики: Heartbeat & Amnesia
-
-![Heartbeat and Amnesia](heartbeat.png)
-
-- **Heartbeat:** Информационная нагрузка; стабилизация вдали от критической линии (2.0).
-- **Amnesia Accumulation:** Динамическое отсечение старого контекста.
-
----
-
-## 🧪 Эксперимент: Qwen2.5
-
-Тест на экстремальные нагрузки (Затравка: *"The dark hall was completely empty. Dust"*).
-
-| Режим | Температура (\(t\)) | % Глаголов | Поведение потока |
-| :--- | :---: | :---: | :--- |
-| **Контроль** | 0.7 | 17.8% | Связный нарратив. |
-| **Пик** | 1.9 | **20.3%** | Максимальное возбуждение. |
-| **Торможение**| 2.5 | 16.7% | Переход в шаблон (охранительное торможение). |
-
----
-
-## 🛠️ Спецификация кода
-При `batch_size > 1` использовать только тензорные операции (без `.item()`) для сохранения графа градиентов:
-```python
-amnesia_gate = torch.sigmoid((tau - self.critical_temp) / 0.1)
-```
-
-## 📚 Цитата (Citation)
-```bibtex
-@misc{eulerianhomeostatic2026,
-  author = {runowerum-create},
-  title = {Eulerian Homeostatic Transformer: An experiment with closed-loop fluid dynamics in LLM},
-  year = {2026},
-  note = {GitHub repository}
-}
-```
+class HomeostaticVortexLayer(nn.Module):
+    """
+    Implementation of the Eulerian Homeostatic Layer 
+    with a closed-loop feedback mechanism, optimized for PyTorch gradients.
+    """
+    def __init__(self, d_model, target_temp=0.3, lambda_param=0.1, critical_temp=2.0):
+        super().__init__()
+        self.d_model = d_model
+        
+        # Homeostatic parameters
+        self.target_temp = target_temp      # tau_target (optimal entropy balance)
+        self.lambda_param = lambda_param    # System thermal capacity parameter
+        self.critical_temp = critical_temp  # Threshold for protective inhibition
+        
+        # Projections to analyze informational pressure (Eulerian flow analogue)
+        self.query_flow = nn.Linear(d_model, d_model)
+        self.context_flow = nn.Linear(d_model, d_model)
+        
+        # Projections for memory vortex transformation
+        self.vortex_update = nn.Linear(d_model, d_model)
+        
+    def forward(self, x, memory_vortex=None):
+        """
+        x: [batch_size, seq_len, d_model] - current batch hidden states
+        memory_vortex: [batch_size, d_model] - current state of the environmental memory vortex
+        """
+        batch_size, seq_len, d_model = x.shape
+        
+        # Initialize vortex memory if it doesn't exist (start of the flow)
+        if memory_vortex is None:
+            memory_vortex = torch.zeros(batch_size, d_model, device=x.device)
+            
+        # 1. Determine local informational pressure (Dynamic Tau)
+        # Compare each token with the mean context of the current batch
+        q = self.query_flow(x)                       # [batch_size, seq_len, d_model]
+        k = self.context_flow(x).mean(dim=1, keepdim=True) # [batch_size, 1, d_model]
+        
+        # Calculate tau individually for each token in the batch using cosine similarity
+        # tau: [batch_size, seq_len]
+        tau = 1.0 - F.cosine_similarity(q, k, dim=-1)
+        
+        # 2. Implement the NEW homeostatic feedback equation:
+        # x * exp((tau_target - tau) / lambda)
+        # Unsqueeze to [batch_size, seq_len, 1] for proper tensor broadcasting
+        homeostatic_scale = torch.exp((self.target_temp - tau) / self.lambda_param).unsqueeze(-1)
+        x_modulated = x * homeostatic_scale
+        
+        # 3. Differentiable Amnesia Gate (replaces broken .mean().item() calls)
+        # Smoothly activates from 0 to 1 when local tau exceeds critical_temp
+        # A pure sigmoid function preserves the PyTorch computational graph
+        amnesia_gate = torch.sigmoid((tau - self.critical_temp) / 0.1).mean(dim=1, keepdim=True) # [batch_size, 1]
+        
+        # 4. Eulerian Memory Vortex update
+        # The current token flow in the batch shapes the new environmental swirl
+        current_vortex_contribution = self.vortex_update(x_modulated).mean(dim=1) # [batch_size, d_model]
+        
+        # Apply environmental viscosity and total wipeout during protective inhibition
+        # (1.0 - amnesia_gate) collapses the vortex under high entropy stress
+        memory_vortex = memory_vortex * (1.0 - amnesia_gate) + current_vortex_contribution * (1.0 - amnesia_gate)
+        
+        # Inject vortex memory dynamics back into the modulated hidden states flow
+        x_final = x_modulated + memory_vortex.unsqueeze(1)
+        
+        return x_final, memory_vortex
