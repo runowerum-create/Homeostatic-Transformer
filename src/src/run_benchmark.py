@@ -1,7 +1,9 @@
 # =============================================================================
 # BENCHMARK RUNNER (run_benchmark.py)
-# Скрипт для автоматического сравнения оригинальной и каузальной моделей.
-# Поместить в папку: src/src/ рядом с оригинальным experiment_runner.py
+# Automated evaluation script comparing the Original and Causal models.
+# Location: src/src/ next to the original experiment_runner.py
+# 
+# Note: The AI collaborator's guidelines and insights are integrated here.
 # =============================================================================
 
 import torch
@@ -9,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import re
 
-# Импортируем оригинальные компоненты и функции расчета метрик
+# Import the original components and metric functions from the baseline
 from experiment_runner import (
     device, 
     tokenizer, 
@@ -22,31 +24,31 @@ from experiment_runner import (
     PulseTransformer
 )
 
-# Импортируем наше честное каузальное расширение
+# Import our robust causal extension
 from causal_extension import CausalPulseTransformer
 
-print(f"\n[Запуск] Инфраструктура готова. Устройство: {device}")
-print(f"Размер словаря оригинального токенизатора: {vocab_size}")
+print(f"\n[System] Benchmark infrastructure initialized. Device: {device}")
+print(f"Tokenizer vocab size: {vocab_size}")
 
 # -----------------------------------------------------------------------------
-# 1. СБОРКА И ОБУЧЕНИЕ МОДЕЛЕЙ
+# 1. MODEL ASSEMBLY AND TRAINING
 # -----------------------------------------------------------------------------
 
-# Шаг А: Создаем и обучаем ОРИГИНАЛЬНУЮ модель (упрощенный causal-loop автора)
-print("\n=== Шаг 1: Обучение оригинальной PulseTransformer ===")
+# Step A: Train the ORIGINAL model (the author's simplified baseline loop)
+print("\n=== Step 1: Training Original PulseTransformer (Baseline) ===")
 original_model = PulseTransformer(vocab_size=vocab_size, critical_temp=2.0).to(device)
 original_model = train_model(original_model, "Original Pulse Transformer (GitHub Baseline)", epochs=5)
 
-# Шаг Б: Создаем новую чистую оригинальную модель и оборачиваем в наш Causal-Адаптер
-print("\n=== Шаг 2: Обучение модифицированной CausalPulseTransformer ===")
+# Step B: Wrap a fresh baseline model into our Causal Extension Adapter
+print("\n=== Step 2: Training CausalPulseTransformer (Our Improved Extension) ===")
 fresh_base_model = PulseTransformer(vocab_size=vocab_size, critical_temp=2.0).to(device)
 causal_model = CausalPulseTransformer(fresh_base_model).to(device)
 causal_model = train_model(causal_model, "Causal Pulse Transformer (Our Extension)", epochs=5)
 
 # -----------------------------------------------------------------------------
-# 2. ГЕНЕРАЦИЯ ТЕКСТА И СБОР МЕТРИК
+# 2. TEXT GENERATION AND METRICS EVALUATION
 # -----------------------------------------------------------------------------
-print("\n=== Шаг 3: Тестирование генерации и сбор метрик ===")
+print("\n=== Step 3: Text Generation & Metrics Evaluation ===")
 prompt = "Once upon a time"
 start_ids = tokenizer.encode(prompt).ids
 
@@ -58,22 +60,21 @@ models_to_test = [
 benchmark_results = []
 
 for name, model in models_to_test:
-    print(f"\nГенерация текста для модели {name}...")
-    # generate_text внутри вызывает model(generated, temps, amnesias) 
-    # Интерфейс нашего адаптера полностью идентичен, поэтому вызов отработает бесшовно
+    print(f"\nGenerating text for {name}...")
+    # The extension adapter shares an identical signature, ensuring seamless execution
     generated_text = generate_text(model, start_ids, max_len=40, is_pulse=True)
     
-    # Считаем метрики текста (Diversity, Repeat, Verbs)
+    # Calculate textual indicators (Diversity, Repeat Rate, Verbs)
     div, rep, vrb = calc_metrics(generated_text)
     benchmark_results.append((name, div, rep, vrb, generated_text))
     
-    print(f" Результат: {generated_text[:140]}...")
+    print(f" Sample output: {generated_text[:140]}...")
 
 # -----------------------------------------------------------------------------
-# 3. СВЕДЕНИЕ РЕЗУЛЬТАТОВ В ИТОГОВУЮ ТАБЛИЦУ
+# 3. FINAL RESULTS BENCHMARK TABLE
 # -----------------------------------------------------------------------------
 print("\n" + "="*85)
-print(f"{'Архитектура Модели':<30} | {'Diversity 📈':<12} | {'Repeat 📉':<10} | {'Verbs ⚙️':<8}")
+print(f"{'Model Architecture':<30} | {'Diversity 📈':<12} | {'Repeat 📉':<10} | {'Verbs ⚙️':<8}")
 print("-"*85)
 
 for name, div, rep, vrb, _ in benchmark_results:
@@ -81,4 +82,4 @@ for name, div, rep, vrb, _ in benchmark_results:
 
 print("="*85)
 
-print("\n[Успешно] Эксперимент Anthropic-стиля завершен! Финальные логи сохранены.")
+print("\n[Success] Anthropic-style evaluation complete! Final results compiled.")
